@@ -1,0 +1,12 @@
+{
+  "name": "sun-blossom-farms",
+  "version": "1.0.0",
+  "description": "Sun Blossom Farms — blueberry farm in Sequim, WA. Online store and Berry Club memberships.",
+  "scripts": {
+    "build": "cd client && npm install && npm run build && cd ../server && npm install",
+    "start": "node server/index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
