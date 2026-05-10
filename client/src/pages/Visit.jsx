@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import Photo from '../components/Photo';
 import { api } from '../api';
+import { photos, fallbackGradients } from '../photos';
 
 export default function Visit() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
@@ -33,6 +35,13 @@ export default function Visit() {
         <h1>Come pick some berries.</h1>
       </header>
 
+      <Photo
+        src={photos.visit}
+        fallback={fallbackGradients.visit}
+        alt="The farm at sunset"
+        style={{ aspectRatio: '5 / 2', marginBottom: 64 }}
+      />
+
       <div className="visit-grid">
         <section className="visit-info">
           <h2>The farm</h2>
@@ -41,8 +50,8 @@ export default function Visit() {
             Sequim, WA 98382
           </p>
           <p>
-            About fifteen minutes off Highway 101, just past the lavender farms. Look for the hand-painted
-            blueberry sign at the gate.
+            About fifteen minutes off Highway 101, just past the lavender farms. Look for the
+            hand-painted blueberry sign at the gate.
           </p>
 
           <h3>Open hours</h3>
@@ -68,7 +77,7 @@ export default function Visit() {
           </p>
         </section>
 
-        <section className="visit-form-wrap">
+        <section>
           <h2>Send us a note</h2>
           {status === 'sent' && (
             <div className="banner banner--ok">Thanks! We read every note and will reply soon.</div>

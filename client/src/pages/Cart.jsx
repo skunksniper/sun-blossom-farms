@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Photo from '../components/Photo';
 import { api, formatMoney } from '../api';
 import { useCart } from '../cart';
+import { photos, fallbackGradients } from '../photos';
 
 export default function Cart() {
   const { cart, setQty, remove, clear } = useCart();
@@ -16,9 +18,7 @@ export default function Cart() {
   }, []);
 
   const lineItems = products
-    ? cart
-        .map((item) => ({ ...item, product: products[item.id] }))
-        .filter((item) => item.product)
+    ? cart.map((item) => ({ ...item, product: products[item.id] })).filter((item) => item.product)
     : [];
   const subtotal = lineItems.reduce((sum, item) => sum + item.product.priceCents * item.qty, 0);
 
@@ -36,8 +36,9 @@ export default function Cart() {
 
   if (cart.length === 0) {
     return (
-      <div className="container section narrow">
-        <h1>Your cart is empty</h1>
+      <div className="container container--narrow section">
+        <p className="eyebrow">Cart</p>
+        <h1>Your cart is empty.</h1>
         <p>Looks like you haven't added any berries yet.</p>
         <Link to="/shop" className="btn btn--primary">Visit the shop</Link>
       </div>
@@ -45,31 +46,30 @@ export default function Cart() {
   }
 
   return (
-    <div className="container section narrow">
-      <h1>Your cart</h1>
+    <div className="container container--narrow section">
+      <p className="eyebrow">Cart</p>
+      <h1>Almost yours.</h1>
       {error && <p className="banner banner--error">{error}</p>}
       <ul className="cart-list">
         {lineItems.map((item) => (
           <li key={item.id} className="cart-row">
+            <Photo
+              className="cart-row__photo"
+              src={photos.products[item.id]}
+              fallback={fallbackGradients.product}
+              alt={item.product.name}
+            />
             <div className="cart-row__name">
               <strong>{item.product.name}</strong>
               <span>{formatMoney(item.product.priceCents)} each</span>
             </div>
             <div className="cart-row__qty">
-              <button
-                aria-label="Decrease quantity"
-                onClick={() => setQty(item.id, item.qty - 1)}
-              >−</button>
+              <button aria-label="Decrease quantity" onClick={() => setQty(item.id, item.qty - 1)}>−</button>
               <span aria-live="polite">{item.qty}</span>
-              <button
-                aria-label="Increase quantity"
-                onClick={() => setQty(item.id, item.qty + 1)}
-              >+</button>
+              <button aria-label="Increase quantity" onClick={() => setQty(item.id, item.qty + 1)}>+</button>
             </div>
-            <div className="cart-row__total">
-              {formatMoney(item.product.priceCents * item.qty)}
-            </div>
-            <button className="link-btn" onClick={() => remove(item.id)}>Remove</button>
+            <div className="cart-row__total">{formatMoney(item.product.priceCents * item.qty)}</div>
+            <button className="link-btn cart-row__remove" onClick={() => remove(item.id)}>Remove</button>
           </li>
         ))}
       </ul>

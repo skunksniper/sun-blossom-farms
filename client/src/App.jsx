@@ -9,6 +9,8 @@ import About from './pages/About.jsx';
 import Visit from './pages/Visit.jsx';
 import Success from './pages/Success.jsx';
 import Welcome from './pages/Welcome.jsx';
+import Pack from './pages/Pack.jsx';
+import Collection from './pages/Collection.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 function ScrollToTop() {
@@ -29,6 +31,8 @@ export default function App() {
           <Route path="/membership" element={<Membership />} />
           <Route path="/about" element={<About />} />
           <Route path="/visit" element={<Visit />} />
+          <Route path="/pack" element={<Pack />} />
+          <Route path="/collection" element={<Collection />} />
           <Route path="/success" element={<Success />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="*" element={<NotFound />} />

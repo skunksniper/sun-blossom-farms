@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import Photo from '../components/Photo';
 import { api, formatMoney } from '../api';
+import { photos, fallbackGradients } from '../photos';
 
 export default function Membership() {
   const [tiers, setTiers] = useState(null);
@@ -33,8 +35,8 @@ export default function Membership() {
         <p className="eyebrow">Berry Club</p>
         <h1>Be a regular at the farm.</h1>
         <p>
-          The Berry Club is the easiest way to keep blueberries in the kitchen all year. Pick a tier,
-          we ship a Berry Box every quarter, and you save on everything we grow.
+          The easiest way to keep blueberries in the kitchen all year. Pick a tier, we ship a
+          Berry Box every quarter, and you save on everything we grow.
         </p>
       </header>
 
@@ -51,22 +53,30 @@ export default function Membership() {
           {tiers.map((tier) => (
             <article key={tier.id} className={`tier ${tier.featured ? 'tier--featured' : ''}`}>
               {tier.featured && <p className="tier__badge">Most popular</p>}
-              <h2 className="tier__name">{tier.name}</h2>
-              <p className="tier__tag">{tier.tagline}</p>
-              <p className="tier__price">
-                <span>{formatMoney(tier.priceCents)}</span>
-                <span className="tier__interval">/{tier.interval}</span>
-              </p>
-              <ul className="tier__perks">
-                {tier.perks.map((perk) => <li key={perk}>{perk}</li>)}
-              </ul>
-              <button
-                className={`btn ${tier.featured ? 'btn--primary' : 'btn--ghost'}`}
-                onClick={() => join(tier.id)}
-                disabled={submitting !== null}
-              >
-                {submitting === tier.id ? 'Heading to Stripe…' : `Join ${tier.name}`}
-              </button>
+              <Photo
+                className="tier__photo"
+                src={photos.tiers[tier.id]}
+                fallback={fallbackGradients.tier}
+                alt={`${tier.name} membership`}
+              />
+              <div className="tier__body">
+                <h2 className="tier__name">{tier.name}</h2>
+                <p className="tier__tag">{tier.tagline}</p>
+                <p className="tier__price">
+                  <span>{formatMoney(tier.priceCents)}</span>
+                  <span className="tier__interval"> /{tier.interval}</span>
+                </p>
+                <ul className="tier__perks">
+                  {tier.perks.map((perk) => <li key={perk}>{perk}</li>)}
+                </ul>
+                <button
+                  className={`btn ${tier.featured ? 'btn--light' : 'btn--ghost'}`}
+                  onClick={() => join(tier.id)}
+                  disabled={submitting !== null}
+                >
+                  {submitting === tier.id ? 'Heading to Stripe…' : `Join ${tier.name}`}
+                </button>
+              </div>
             </article>
           ))}
         </div>
@@ -77,22 +87,22 @@ export default function Membership() {
         <details>
           <summary>When does my Berry Box ship?</summary>
           <p>
-            Boxes go out the second week of January, April, July, and October. July is the big one — fresh berries,
-            shipped overnight on ice.
+            Boxes go out the second week of January, April, July, and October. July is the big one —
+            fresh berries, shipped overnight on ice.
           </p>
         </details>
         <details>
           <summary>Can I cancel anytime?</summary>
           <p>
-            Of course. Cancel from the email confirmation we send, or just write us. We'll honor any boxes you've
-            already paid for, and stop the clock from there.
+            Of course. Cancel from the email confirmation we send, or just write us. We'll honor any
+            boxes you've already paid for, and stop the clock from there.
           </p>
         </details>
         <details>
           <summary>Do members really get a row reserved at the farm?</summary>
           <p>
-            Orchard tier, yes. We hand-letter a wooden sign with your name and stake it at a row each spring.
-            You can come pick it whenever it's open.
+            Orchard tier, yes. We hand-letter a wooden sign with your name and stake it at a row each
+            spring. You can come pick it whenever it's open.
           </p>
         </details>
         <details>
