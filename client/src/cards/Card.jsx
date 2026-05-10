@@ -1,10 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TYPES, RARITIES } from './data';
 import CardArt from './CardArt';
 
 const ENERGY_GLYPH = (type) => TYPES[type]?.glyph || '·';
 
-export default function Card({ card, faceDown = false, interactive = true, onClick, size = 'normal' }) {
+export default function Card({ card, faceDown = false, interactive = true, onClick, gyro = false }) {
   const ref = useRef(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0, mx: 50, my: 50 });
 
@@ -13,14 +13,35 @@ export default function Card({ card, faceDown = false, interactive = true, onCli
   const isHolo = card.rarity === 'rare' || card.rarity === 'ultra' || card.rarity === 'legendary';
   const isLegendary = card.rarity === 'legendary';
 
+  useEffect(() => {
+    if (!gyro) return;
+    let last = 0;
+    function handler(e) {
+      const now = Date.now();
+      if (now - last < 32) return;
+      last = now;
+      const beta = Math.max(-30, Math.min(30, e.beta || 0));
+      const gamma = Math.max(-30, Math.min(30, e.gamma || 0));
+      setTilt({
+        x: -(beta - 20) * 0.4,
+        y: gamma * 0.5,
+        mx: 50 + gamma * 1.6,
+        my: 50 + (beta - 20) * 1.4,
+      });
+    }
+    window.addEventListener('deviceorientation', handler);
+    return () => window.removeEventListener('deviceorientation', handler);
+  }, [gyro]);
+
   function handleMove(event) {
     if (!interactive || !ref.current) return;
     const rect = ref.current.getBoundingClientRect();
-    const px = (event.clientX - rect.left) / rect.width;
-    const py = (event.clientY - rect.top) / rect.height;
+    const point = event.touches ? event.touches[0] : event;
+    const px = (point.clientX - rect.left) / rect.width;
+    const py = (point.clientY - rect.top) / rect.height;
     setTilt({
-      x: (py - 0.5) * -16,
-      y: (px - 0.5) * 16,
+      x: (py - 0.5) * -18,
+      y: (px - 0.5) * 18,
       mx: px * 100,
       my: py * 100,
     });
@@ -33,9 +54,11 @@ export default function Card({ card, faceDown = false, interactive = true, onCli
   return (
     <div
       ref={ref}
-      className={`tcg-card tcg-card--${card.type} tcg-card--${card.rarity} ${isHolo ? 'tcg-card--holo' : ''} ${faceDown ? 'tcg-card--down' : ''} ${size === 'small' ? 'tcg-card--small' : ''}`}
+      className={`tcg-card tcg-card--${card.type} tcg-card--${card.rarity} ${isHolo ? 'tcg-card--holo' : ''} ${faceDown ? 'tcg-card--down' : ''}`}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
+      onTouchMove={handleMove}
+      onTouchEnd={handleLeave}
       onClick={onClick}
       style={{
         '--rx': `${tilt.x}deg`,
@@ -45,7 +68,6 @@ export default function Card({ card, faceDown = false, interactive = true, onCli
       }}
     >
       <div className="tcg-card__inner">
-        {/* Face */}
         <div className="tcg-card__face">
           <header className="tcg-card__head">
             <div className="tcg-card__name-wrap">
@@ -62,9 +84,15 @@ export default function Card({ card, faceDown = false, interactive = true, onCli
             <div className="tcg-card__art">
               <CardArt id={card.id} />
             </div>
-            {isHolo && <div className="tcg-card__shimmer" aria-hidden="true" />}
+            {isHolo && (
+              <>
+                <div className="tcg-card__shimmer" aria-hidden="true" />
+                <div className="tcg-card__chromatic" aria-hidden="true" />
+                <div className="tcg-card__sheen" aria-hidden="true" />
+              </>
+            )}
             <div className="tcg-card__art-stripe">
-              <span>BerryDex No. {String(card.id.length).padStart(0, '0')}{card.id.slice(0, 3).toUpperCase()}</span>
+              <span>BerryDex No. {card.id.slice(0, 3).toUpperCase()}</span>
               <span>{type.label}</span>
             </div>
           </div>
@@ -94,8 +122,9 @@ export default function Card({ card, faceDown = false, interactive = true, onCli
                 </span>
               )}
               <span>
-                Retreat {Array.from({ length: card.retreat || 0 }).map((_, i) => <span key={i} className="energy energy--blank">·</span>)}
-                {(!card.retreat || card.retreat === 0) && <span style={{ opacity: 0.5 }}>Free</span>}
+                Retreat {card.retreat > 0
+                  ? Array.from({ length: card.retreat }).map((_, i) => <span key={i} className="energy energy--blank">·</span>)
+                  : <span style={{ opacity: 0.5 }}>Free</span>}
               </span>
             </div>
             <p className="tcg-card__flavor">{card.flavor}</p>
@@ -106,28 +135,46 @@ export default function Card({ card, faceDown = false, interactive = true, onCli
               <span className="tcg-card__set">SBF · 01</span>
             </div>
           </footer>
+
+          {isHolo && <div className="tcg-card__edge" aria-hidden="true" />}
         </div>
 
-        {/* Back */}
         <div className="tcg-card__back" aria-hidden="true">
-          <svg viewBox="0 0 100 140" width="100%" height="100%" preserveAspectRatio="none">
-            <rect width="100" height="140" fill="#1a0f33" />
-            <g opacity="0.5">
-              {[20, 50, 80].map((cy) => (
-                [20, 50, 80].map((cx) => (
-                  <g key={`${cx}-${cy}`}>
-                    <circle cx={cx} cy={cy} r="6" fill="#5a3fa0" />
-                    <circle cx={cx + 10} cy={cy + 5} r="5" fill="#3a2a6a" />
-                    <circle cx={cx + 5} cy={cy - 4} r="4" fill="#7d5dd6" />
-                  </g>
-                ))
-              ))}
-            </g>
-            <text x="50" y="120" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="12" fill="#f4c95d" textAnchor="middle">Sun Blossom</text>
-            <text x="50" y="132" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="9" fill="#ffe39a" textAnchor="middle">Berry Battle</text>
-          </svg>
+          <CardBack />
         </div>
       </div>
     </div>
+  );
+}
+
+function CardBack() {
+  return (
+    <svg viewBox="0 0 100 140" width="100%" height="100%" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="backBg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#2a1d4f" />
+          <stop offset="100%" stopColor="#1a0f33" />
+        </linearGradient>
+        <radialGradient id="backVignette" cx="0.5" cy="0.5" r="0.7">
+          <stop offset="0%" stopColor="rgba(244, 201, 93, 0.18)" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0.5)" />
+        </radialGradient>
+      </defs>
+      <rect width="100" height="140" fill="url(#backBg)" />
+      <rect width="100" height="140" fill="url(#backVignette)" />
+      <g opacity="0.8">
+        <circle cx="50" cy="60" r="18" fill="#7d5dd6" />
+        <circle cx="38" cy="56" r="13" fill="#5a3fa0" />
+        <circle cx="58" cy="50" r="11" fill="#9678e0" />
+        <circle cx="50" cy="70" r="10" fill="#3a2a6a" />
+        <circle cx="34" cy="50" r="3" fill="rgba(255,255,255,0.7)" />
+        <circle cx="55" cy="46" r="2.5" fill="rgba(255,255,255,0.7)" />
+        <path d="M50 38 Q54 28 64 26 Q56 32 52 40" fill="#4d8044" />
+      </g>
+      <rect x="6" y="6" width="88" height="128" rx="8" fill="none" stroke="rgba(244, 201, 93, 0.4)" strokeWidth="0.5" />
+      <text x="50" y="108" fontFamily="Fraunces, serif" fontStyle="italic" fontSize="9" fill="#f4c95d" textAnchor="middle" letterSpacing="2">SUN BLOSSOM</text>
+      <text x="50" y="120" fontFamily="Fraunces, serif" fontStyle="italic" fontWeight="500" fontSize="8" fill="#ffe39a" textAnchor="middle">Berry Battle</text>
+      <text x="50" y="130" fontFamily="Inter, sans-serif" fontSize="4" fill="rgba(255,255,255,0.4)" textAnchor="middle" letterSpacing="2">SERIES 01</text>
+    </svg>
   );
 }

@@ -1,12 +1,22 @@
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useCart } from '../cart';
 
 function Header() {
   const { totalItems } = useCart();
+  const [open, setOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => { setOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
   return (
-    <header className="site-header">
+    <header className={`site-header ${open ? 'site-header--open' : ''}`}>
       <div className="site-header__inner">
-        <Link to="/" className="brand" aria-label="Sun Blossom Farms home">
+        <Link to="/" className="brand" aria-label="Sun Blossom Farms home" onClick={() => setOpen(false)}>
           <span className="brand__mark" aria-hidden="true">
             <svg viewBox="0 0 32 32" width="22" height="22">
               <circle cx="11" cy="20" r="6" fill="#7d5dd6" />
@@ -15,22 +25,64 @@ function Header() {
             </svg>
           </span>
           <span className="brand__words">
-            <span className="brand__name">Sun Blossom Farms</span>
-            <span className="brand__tag">Sequim, Washington</span>
+            <span className="brand__name">Sun Blossom</span>
+            <span className="brand__tag">Sequim, WA</span>
           </span>
         </Link>
-        <nav className="site-nav" aria-label="Primary">
+
+        <nav className="site-nav site-nav--desktop" aria-label="Primary">
           <NavLink to="/shop">Shop</NavLink>
           <NavLink to="/membership">Berry Club</NavLink>
           <NavLink to="/about">Our Farm</NavLink>
           <NavLink to="/visit">Visit</NavLink>
-          <NavLink to="/pack" className="site-nav__pack">Pack ✦</NavLink>
-          <NavLink to="/cart" className="site-nav__cart">
-            Cart{totalItems > 0 && <span className="cart-count">{totalItems}</span>}
+          <NavLink to="/pack" className="site-nav__pack">Pack&nbsp;<span aria-hidden>✦</span></NavLink>
+          <NavLink to="/cart" className="site-nav__cart" aria-label={`Cart, ${totalItems} items`}>
+            <CartIcon />
+            {totalItems > 0 && <span className="cart-count">{totalItems}</span>}
           </NavLink>
         </nav>
+
+        <button
+          className="burger"
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          <span /><span /><span />
+        </button>
       </div>
+
+      <div
+        className={`drawer ${open ? 'drawer--open' : ''}`}
+        aria-hidden={!open}
+      >
+        <nav className="drawer__nav" aria-label="Primary mobile">
+          <NavLink to="/" end>Home</NavLink>
+          <NavLink to="/shop">Shop</NavLink>
+          <NavLink to="/membership">Berry Club</NavLink>
+          <NavLink to="/about">Our Farm</NavLink>
+          <NavLink to="/visit">Visit</NavLink>
+          <NavLink to="/cart">Cart {totalItems > 0 && <span className="cart-count cart-count--inline">{totalItems}</span>}</NavLink>
+          <NavLink to="/pack" className="drawer__pack">
+            <span>Open a pack</span>
+            <span aria-hidden>✦</span>
+          </NavLink>
+          <NavLink to="/collection" className="drawer__sub">BerryDex</NavLink>
+        </nav>
+        <p className="drawer__tag">Thank you berry much.</p>
+      </div>
+      {open && <button className="drawer__scrim" aria-label="Close menu" onClick={() => setOpen(false)} />}
     </header>
+  );
+}
+
+function CartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 5h2l2.4 11.4a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H6" />
+      <circle cx="9" cy="21" r="1.4" />
+      <circle cx="18" cy="21" r="1.4" />
+    </svg>
   );
 }
 
@@ -59,6 +111,7 @@ function Footer() {
             <li><Link to="/membership">Berry Club</Link></li>
             <li><Link to="/about">Our story</Link></li>
             <li><Link to="/visit">Visit & contact</Link></li>
+            <li><Link to="/pack">Open a pack</Link></li>
           </ul>
         </div>
       </div>
