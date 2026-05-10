@@ -18,7 +18,7 @@ export default function Welcome() {
   const tier = session?.metadata?.tier;
 
   return (
-    <div className="container section narrow celebrate">
+    <div className="container container--narrow section celebrate">
       <h1>Welcome to the Berry Club.</h1>
       <p>
         You're in. The first newsletter goes out next Tuesday, and your first Berry Box ships at the start

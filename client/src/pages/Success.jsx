@@ -21,7 +21,7 @@ export default function Success() {
   }, [sessionId, clear]);
 
   return (
-    <div className="container section narrow celebrate">
+    <div className="container container--narrow section celebrate">
       <h1>Thank you berry much.</h1>
       <p>Your order is in. We'll send a confirmation to your email shortly.</p>
       {!sessionId && <p>(No session ID on this page — if you got here by accident, head back to the <Link to="/shop">shop</Link>.)</p>}
