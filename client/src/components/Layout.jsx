@@ -2,17 +2,17 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useCart } from '../cart';
 
-function Header() {
-  const { totalItems } = useCart();
-  const [open, setOpen] = useState(false);
-  const location = useLocation();
+function CartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 5h2l2.4 11.4a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H6" />
+      <circle cx="9" cy="21" r="1.4" />
+      <circle cx="18" cy="21" r="1.4" />
+    </svg>
+  );
+}
 
-  useEffect(() => { setOpen(false); }, [location.pathname]);
-  useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [open]);
-
+function Header({ open, setOpen, totalItems }) {
   return (
     <header className={`site-header ${open ? 'site-header--open' : ''}`}>
       <div className="site-header__inner">
@@ -51,7 +51,14 @@ function Header() {
           <span /><span /><span />
         </button>
       </div>
+    </header>
+  );
+}
 
+function Drawer({ open, setOpen, totalItems }) {
+  return (
+    <>
+      {open && <button className="drawer__scrim" aria-label="Close menu" onClick={() => setOpen(false)} />}
       <div
         className={`drawer ${open ? 'drawer--open' : ''}`}
         aria-hidden={!open}
@@ -71,18 +78,7 @@ function Header() {
         </nav>
         <p className="drawer__tag">Thank you berry much.</p>
       </div>
-      {open && <button className="drawer__scrim" aria-label="Close menu" onClick={() => setOpen(false)} />}
-    </header>
-  );
-}
-
-function CartIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M3 5h2l2.4 11.4a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H6" />
-      <circle cx="9" cy="21" r="1.4" />
-      <circle cx="18" cy="21" r="1.4" />
-    </svg>
+    </>
   );
 }
 
@@ -124,9 +120,20 @@ function Footer() {
 }
 
 export default function Layout() {
+  const { totalItems } = useCart();
+  const [open, setOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => { setOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
   return (
     <div className="site">
-      <Header />
+      <Header open={open} setOpen={setOpen} totalItems={totalItems} />
+      <Drawer open={open} setOpen={setOpen} totalItems={totalItems} />
       <main className="site-main">
         <Outlet />
       </main>

@@ -264,7 +264,7 @@ ul { padding-left: 1.2em; }
   background: var(--berry-950);
   color: var(--bone);
   padding: 32px 28px;
-  z-index: 99;
+  z-index: 110;
   transform: translateX(110%);
   transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
   overflow-y: auto;
@@ -316,10 +316,9 @@ ul { padding-left: 1.2em; }
 }
 .drawer__scrim {
   position: fixed;
-  top: var(--header-h);
   inset: var(--header-h) 0 0 0;
   background: rgba(20, 16, 30, 0.4);
-  z-index: 98;
+  z-index: 105;
   border: none;
   cursor: pointer;
   animation: fadeIn 0.25s;
